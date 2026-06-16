@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BigQuery Release Pulse</title>
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar / Header Area -->
+        <aside class="sidebar">
+            <div class="brand">
+                <div class="brand-logo">
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2005/svg">
+                        <path d="M12 2L2 7L12 12L22 7L12 2Z" fill="url(#brandGrad)" />
+                        <path d="M2 17L12 22L22 17M2 12L12 17L22 12" stroke="url(#brandGrad)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <defs>
+                            <linearGradient id="brandGrad" x1="2" y1="2" x2="22" y2="22" gradientUnits="userSpaceOnUse">
+                                <stop stop-color="#8b5cf6"/>
+                                <stop offset="1" stop-color="#3b82f6"/>
+                            </linearGradient>
+                        </defs>
+                    </svg>
+                </div>
+                <div>
+                    <h1>BigQuery Release Pulse</h1>
+                    <p class="subtitle">Stay updated, share the news</p>
+                </div>
+            </div>
+
+            <!-- Dashboard Stats / Info -->
+            <div class="glass-panel info-box">
+                <div class="info-row">
+                    <span class="info-label">Last Checked</span>
+                    <span id="last-updated-time" class="info-value">Loading...</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Updates Found</span>
+                    <span id="total-updates-count" class="info-value">0</span>
+                </div>
+                <button id="refresh-btn" class="btn btn-primary btn-refresh">
+                    <svg class="icon spinner-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/>
+                    </svg>
+                    <span>Refresh Feed</span>
+                </button>
+            </div>
+
+            <!-- Filters & Search Section -->
+            <div class="glass-panel search-section">
+                <h2>Filter Updates</h2>
+                <div class="search-wrapper">
+                    <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="11" cy="11" r="8"/>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                    </svg>
+                    <input type="text" id="search-input" placeholder="Search keywords...">
+                </div>
+
+                <div class="filter-group">
+                    <span class="filter-title">Type</span>
+                    <div class="filter-pills" id="type-filters">
+                        <button class="pill active" data-filter="all">All Types</button>
+                        <button class="pill" data-filter="Feature">Features</button>
+                        <button class="pill" data-filter="Issue">Issues</button>
+                        <button class="pill" data-filter="Deprecation">Deprecations</button>
+                        <button class="pill" data-filter="Change">Changes</button>
+                        <button class="pill" data-filter="Other">Others</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="footer-note">
+                <p>Data synced directly from BigQuery Release RSS Feed.</p>
+            </div>
+        </aside>
+
+        <!-- Main Content Area: Feed and Tweet Composer -->
+        <main class="main-content">
+            <!-- Left Side: Releases Feed -->
+            <section class="feed-section">
+                <div class="section-header">
+                    <h2>Release Feed</h2>
+                    <span class="results-badge" id="visible-count-badge">Showing 0 updates</span>
+                </div>
+                <div class="feed-container" id="feed-container">
+                    <!-- Skeletons shown during load -->
+                    <div class="skeleton-card">
+                        <div class="skeleton skeleton-header"></div>
+                        <div class="skeleton skeleton-title"></div>
+                        <div class="skeleton skeleton-text"></div>
+                        <div class="skeleton skeleton-text"></div>
+                    </div>
+                    <div class="skeleton-card">
+                        <div class="skeleton skeleton-header"></div>
+                        <div class="skeleton skeleton-title"></div>
+                        <div class="skeleton skeleton-text"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Right Side: Tweet Composer -->
+            <section class="composer-section">
+                <div class="sticky-wrapper">
+                    <div class="section-header">
+                        <h2>Tweet Composer</h2>
+                    </div>
+                    <div id="composer-card" class="glass-panel composer-card empty-state">
+                        <!-- Empty State view (Initial) -->
+                        <div id="composer-empty" class="composer-empty">
+                            <div class="tweet-empty-icon">
+                                <svg viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                                </svg>
+                            </div>
+                            <h3>Select an Update</h3>
+                            <p>Click on any release card in the feed to customize, preview, and tweet it to your audience.</p>
+                        </div>
+
+                        <!-- Active Composer view -->
+                        <div id="composer-active" class="composer-active hidden">
+                            <div class="composer-meta">
+                                <span class="update-date" id="comp-date">June 15, 2026</span>
+                                <span class="badge" id="comp-badge">Feature</span>
+                            </div>
+                            
+                            <h3 class="composer-title">Compose your Tweet</h3>
+                            
+                            <!-- Template Selection Piles -->
+                            <div class="template-selector">
+                                <span class="label">Style Template</span>
+                                <div class="template-buttons">
+                                    <button class="tpl-btn active" data-template="professional">💼 Professional</button>
+                                    <button class="tpl-btn" data-template="hype">🔥 Hype/Excited</button>
+                                    <button class="tpl-btn" data-template="short">⚡ Quick Snippet</button>
+                                </div>
+                            </div>
+
+                            <!-- Text Editor -->
+                            <div class="text-editor-wrapper">
+                                <textarea id="tweet-textarea" rows="7" placeholder="What's happening?"></textarea>
+                                <div class="char-count-wrapper">
+                                    <span id="char-counter">0 / 280</span>
+                                    <span id="char-warning" class="hidden-warn">Too long for a standard tweet!</span>
+                                </div>
+                            </div>
+
+                            <!-- Action Buttons -->
+                            <div class="action-buttons">
+                                <button id="tweet-btn" class="btn btn-tweet">
+                                    <svg viewBox="0 0 24 24" fill="currentColor" class="icon">
+                                        <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                                    </svg>
+                                    <span>Tweet on X</span>
+                                </button>
+                                <button id="copy-btn" class="btn btn-secondary">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon copy-icon">
+                                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                                    </svg>
+                                    <span id="copy-btn-text">Copy Text</span>
+                                </button>
+                                <a id="source-link" href="#" target="_blank" class="btn btn-link">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon">
+                                        <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3"/>
+                                    </svg>
+                                    <span>Read Doc</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Custom JavaScript -->
+    <script src="/static/app.js"></script>
+</body>
+</html>
